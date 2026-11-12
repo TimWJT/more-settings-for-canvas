@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Download course files</title>
+  <link rel="stylesheet" href="../css/downloader.css">
+</head>
+<body>
+  <header>
+    <a id="back" href="popup.html" title="Back to settings">←</a>
+    <h1 id="title">Download course files</h1>
+    <p id="status">Loading…</p>
+  </header>
+
+  <div id="toolbar" hidden>
+    <button id="all">All</button>
+    <button id="none">None</button>
+    <button id="new">Only new</button>
+    <span class="skip">
+      <label><input type="checkbox" id="skipVideo" checked> Skip videos</label>
+      <label><input type="checkbox" id="skipBig" checked> Skip VMs &amp; zips</label>
+    </span>
+  </div>
+
+  <main id="list"></main>
+
+  <footer id="footer" hidden>
+    <span id="summary"></span>
+    <button id="go" class="primary">Download</button>
+  </footer>
+
+  <script src="../js/downloader.js"></script>
+</body>
+</html>

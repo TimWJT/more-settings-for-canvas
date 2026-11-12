@@ -1,0 +1,210 @@
+/* More Settings for Canvas - page styles. Everything is switched on by attributes that content/canvas.js sets on
+   <html>, so nothing here does anything until the matching setting is on.
+
+   Dark mode is one colour filter on <html>, drawn by the GPU, instead of recolouring every element with JS.
+   invert(a) turns white into #161616 (a = 0.9137) and black into light grey; hue-rotate(180deg) brings colours back
+   to their own hue (blue stays blue). Pictures and videos get the exact opposite filter, so they look normal:
+   hue-rotate(180deg) invert(1) contrast(k) with k = 1 / (2a - 1) = 1.2086.
+   It's off in Windows high contrast (forced colours) and in fullscreen. */
+
+@media screen and (forced-colors: none) {
+  html[data-mscv-dark]:not([data-mscv-fs]) {
+    filter: invert(0.9137) hue-rotate(180deg) !important;
+    background-color: #fff !important;   /* becomes the dark background */
+    min-height: 100%;
+    color-scheme: light !important;      /* the filter does the darkening, so native widgets must stay light */
+  }
+
+  /* Media: real colours. Skips anything inside media that is already undone, so nothing is flipped twice. */
+  html[data-mscv-dark]:not([data-mscv-fs]) :is(
+    img, picture, video, canvas, [style*="background-image"],
+    iframe:is([src*="youtube"], [src*="vimeo.com"], [src*="kaltura"], [src*="panopto"], [src*="echo360"],
+      [src*="loom.com"], [src*="media_objects"], [src*="instructuremedia"], [src*="vidgrid"])
+  ):not(:is(picture, [style*="background-image"]) *) {
+    filter: hue-rotate(180deg) invert(1) contrast(1.2086) !important;
+  }
+}
+
+/* ---------- Compact cards and hide feedback ---------- */
+html[data-mscv-compact] .ic-DashboardCard__header_hero { height: 56px !important; }
+html[data-mscv-compact] :is(.ic-DashboardCard__header-subtitle, .ic-DashboardCard__header-term) { display: none !important; }
+html[data-mscv-nofeedback] .recent_feedback { display: none !important; }
+
+/* To-do list on: hide Canvas's own sidebar parts (kept on the page, just not shown), except Recent feedback. */
+html[data-mscv-todo] #right-side > :not(#mscv-todo):not(.recent_feedback):not(:has(.recent_feedback)) {
+  display: none !important;
+}
+
+/* ---------- Shared bits for what we add (Canvas's light look; dark mode's filter darkens it like the rest) ---------- */
+:is(.mscv-due, .mscv-todo, .mscv-notes) {
+  --mscv-text: #273540;
+  --mscv-muted: #5f6b75;
+  --mscv-line: #e1e5e8;
+  --mscv-soft: #f2f4f5;
+  --mscv-red: #c4161f;
+  --mscv-accent: #2b7abc;
+  font-family: inherit;
+  color: var(--mscv-text);
+  box-sizing: border-box;
+}
+:is(.mscv-due, .mscv-todo, .mscv-notes) * { box-sizing: border-box; }
+:is(.mscv-due, .mscv-todo) :is(button, input, select, a):focus-visible {
+  outline: 2px solid var(--mscv-accent);
+  outline-offset: 2px;
+}
+
+.mscv-bars { display: grid; gap: 7px; padding: 4px 0; }
+.mscv-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--mscv-line);
+  animation: mscv-pulse 1.2s ease-in-out infinite alternate;
+}
+.mscv-bar:nth-child(2) { width: 75%; }
+.mscv-bar:nth-child(3) { width: 55%; }
+@keyframes mscv-pulse { from { opacity: 1; } to { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .mscv-bar { animation: none; } }
+
+/* ---------- Notes box ---------- */
+.mscv-notes { margin: 0 0 16px; }
+.mscv-notes-text {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid #c7cdd1;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--mscv-text);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.45;
+  resize: none;
+  overflow: hidden;
+}
+.mscv-notes-text:focus { outline: 2px solid var(--mscv-accent); outline-offset: 1px; }
+
+/* ---------- Upcoming work under each course card ---------- */
+.mscv-due { padding: 8px 12px 10px; border-top: 1px solid var(--mscv-line); font-size: 13px; line-height: 1.35; }
+.mscv-due-head { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--mscv-muted); margin-bottom: 4px; }
+.mscv-due-none { margin: 0; color: var(--mscv-muted); }
+.mscv-due-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.mscv-due-item { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.mscv-due-title {
+  flex: 1; min-width: 0;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  color: var(--mscv-text);
+}
+a.mscv-due-title:hover { color: var(--mscv-accent); }
+.mscv-due-when {
+  flex: none;
+  border: 0; background: none; padding: 1px 4px; margin: 0;
+  border-radius: 4px;
+  font: inherit; font-size: 12px; font-weight: 600;
+  color: var(--mscv-muted);
+  cursor: pointer;
+}
+.mscv-due-when:hover { background: var(--mscv-soft); }
+.mscv-due-item.mscv-late .mscv-due-when { color: var(--mscv-red); }
+.mscv-due-item.mscv-crossed :is(.mscv-due-title, .mscv-due-when) { text-decoration: line-through; opacity: .55; }
+
+/* ---------- To-do list ---------- */
+.mscv-todo { position: relative; margin: 0 0 24px; font-size: 14px; line-height: 1.35; }
+.mscv-todo-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.mscv-h { margin: 0; font-size: 17px; font-weight: 700; color: var(--mscv-text); flex: 1; }
+.mscv-ann-h { margin-top: 18px; margin-bottom: 6px; }
+.mscv-seg { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--mscv-soft); }
+.mscv-seg-btn, .mscv-add-btn, .mscv-more, .mscv-btn, .mscv-menu-btn, .mscv-menu-item {
+  font: inherit; color: inherit; cursor: pointer; margin: 0;
+}
+.mscv-seg-btn { border: 0; background: none; padding: 3px 9px; border-radius: 6px; font-size: 12.5px; font-weight: 600; color: var(--mscv-muted); }
+.mscv-seg-btn[aria-pressed="true"] { background: #fff; color: var(--mscv-text); box-shadow: 0 1px 2px #0000001f; }
+.mscv-add-btn { border: 1px solid var(--mscv-line); background: #fff; padding: 3px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 600; }
+.mscv-add-btn:hover, .mscv-btn:hover { background: var(--mscv-soft); }
+
+.mscv-status:empty { display: none; }
+.mscv-status { margin: 0 0 8px; color: var(--mscv-red); font-size: 13px; }
+
+.mscv-list { list-style: none; margin: 0; padding: 0; }
+.mscv-empty { color: var(--mscv-muted); font-size: 13px; padding: 6px 0; }
+.mscv-empty:empty { display: none; }
+.mscv-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 9px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--mscv-line);
+}
+.mscv-icon { width: 20px; height: 20px; margin-top: 1px; fill: none; stroke: var(--mscv-muted); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mscv-body { min-width: 0; display: grid; gap: 1px; }
+.mscv-line { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.mscv-title { font-weight: 600; color: var(--mscv-text); overflow-wrap: anywhere; }
+a.mscv-title { text-decoration: none; }
+a.mscv-title:hover { text-decoration: underline; }
+.mscv-label {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: var(--mscv-soft);
+  color: var(--mscv-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.mscv-course, .mscv-date { font-size: 12.5px; color: var(--mscv-muted); }
+.mscv-item.mscv-soon .mscv-date { color: var(--mscv-red); font-weight: 600; }
+.mscv-item.mscv-crossed .mscv-title { text-decoration: line-through; opacity: .55; }
+
+.mscv-menu-btn {
+  width: 28px; height: 28px;
+  border: 0; border-radius: 6px; background: none;
+  font-size: 18px; line-height: 1; color: var(--mscv-muted);
+}
+.mscv-menu-btn:hover, .mscv-menu-btn[aria-expanded="true"] { background: var(--mscv-soft); color: var(--mscv-text); }
+.mscv-menu {
+  position: absolute; right: 0; top: 38px; z-index: 20;
+  display: grid; min-width: 170px; padding: 4px;
+  background: #fff; border-radius: 8px;
+  box-shadow: 0 6px 22px #00000029, 0 0 0 1px #0000001a;
+}
+.mscv-menu-item { border: 0; background: none; text-align: left; padding: 7px 10px; border-radius: 6px; font-size: 13.5px; }
+.mscv-menu-item:hover, .mscv-menu-item:focus { background: var(--mscv-soft); outline: none; }
+
+.mscv-more {
+  display: block; width: 100%; margin-top: 6px; padding: 6px;
+  border: 0; border-radius: 6px; background: none;
+  font-size: 13px; font-weight: 600; color: var(--mscv-accent);
+}
+.mscv-more:hover { background: var(--mscv-soft); }
+.mscv-more[hidden] { display: none; }
+
+/* "+ Add" form and the label box */
+.mscv-form { display: grid; gap: 8px; padding: 10px; margin-bottom: 10px; border-radius: 8px; background: var(--mscv-soft); }
+.mscv-form[hidden] { display: none; }
+.mscv-field { display: grid; gap: 3px; font-size: 12.5px; font-weight: 600; color: var(--mscv-muted); }
+.mscv-field :is(input, select), .mscv-label-form input {
+  font: inherit; font-size: 14px; font-weight: 400; color: var(--mscv-text);
+  padding: 5px 8px; border: 1px solid #c7cdd1; border-radius: 6px; background: #fff; width: 100%;
+  margin: 0; height: auto;
+}
+.mscv-form-error { margin: 0; color: var(--mscv-red); font-size: 12.5px; }
+.mscv-form-error:empty { display: none; }
+.mscv-form-actions { display: flex; gap: 8px; }
+.mscv-btn { border: 1px solid #c7cdd1; background: #fff; padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+.mscv-btn.mscv-primary { background: #2b7abc; border-color: #2b7abc; color: #fff; }
+.mscv-btn.mscv-primary:hover { background: #23679f; }
+.mscv-label-form { display: flex; gap: 6px; margin-top: 5px; }
+
+/* Hover preview */
+.mscv-preview {
+  position: absolute; left: 0; right: 0; z-index: 15;
+  margin-top: 2px; padding: 10px 12px;
+  background: #fff; border-radius: 8px;
+  box-shadow: 0 6px 22px #00000029, 0 0 0 1px #0000001a;
+  font-size: 13px; pointer-events: none;
+}
+.mscv-preview[hidden] { display: none; }
+.mscv-preview-type { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--mscv-muted); }
+.mscv-preview-title { font-weight: 700; margin: 2px 0 4px; }
+.mscv-preview-text { color: var(--mscv-muted); overflow-wrap: anywhere; }

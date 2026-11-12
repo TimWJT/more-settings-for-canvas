@@ -1,0 +1,84 @@
+{
+  "manifest_version": 3,
+  "name": "More Settings for Canvas",
+  "version": "1.1.0",
+  "description": "A calmer Canvas: fast dark mode, upcoming work on each course card, a better to-do list with your own items, dashboard notes, due-soon reminders on other sites and a course file downloader.",
+  "icons": {
+    "48": "icon.svg",
+    "96": "icon.svg"
+  },
+  "action": {
+    "default_icon": "icon.svg",
+    "default_popup": "popup.html",
+    "default_title": "More Settings for Canvas"
+  },
+  "background": {
+    "scripts": [
+      "settings.js",
+      "background.js"
+    ]
+  },
+  "sidebar_action": {
+    "default_panel": "html/downloader.html?sidebar=1",
+    "default_title": "Download course files",
+    "default_icon": "icon.svg",
+    "open_at_install": false
+  },
+  "permissions": [
+    "storage",
+    "scripting",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://*.instructure.com/*",
+    "https://canvas.sydney.edu.au/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.instructure.com/*",
+        "https://canvas.sydney.edu.au/*"
+      ],
+      "css": [
+        "canvas.css"
+      ],
+      "js": [
+        "settings.js",
+        "content/reminder-card.js",
+        "content/canvas.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://*/*"
+      ],
+      "exclude_matches": [
+        "https://*.instructure.com/*",
+        "https://canvas.sydney.edu.au/*"
+      ],
+      "js": [
+        "settings.js",
+        "content/reminder-card.js",
+        "content/reminders.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "more-settings-for-canvas@timwjt",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  }
+}

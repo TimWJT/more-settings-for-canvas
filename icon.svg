@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- red tile with a graduation cap and a small settings badge -->
+  <rect x="2" y="6" width="54" height="50" rx="12" fill="#e72429"/>
+  <path d="M29 15 8 25l21 10 21-10z" fill="#fff"/>
+  <path d="M17 30v9c0 4 6 7 12 7s12-3 12-7v-9l-12 6z" fill="#fff" opacity=".85"/>
+  <path d="M47 27v8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="50" cy="50" r="12" fill="#fff"/>
+  <g stroke="#e72429" stroke-width="2.4" stroke-linecap="round"><path d="M43 46h14M43 54h14"/></g>
+  <g fill="#e72429"><circle cx="47" cy="46" r="2.8"/><circle cx="53" cy="54" r="2.8"/></g>
+</svg>

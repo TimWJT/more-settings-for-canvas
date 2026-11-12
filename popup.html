@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>More Settings for Canvas</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="main">
+    <header class="header">
+      <img src="icon.svg" alt="" width="46" height="46">
+      <h1>Canvas Settings</h1>
+      <button type="button" class="power icon-only" id="power" role="switch" aria-checked="true" aria-label="Add-on on or off" title="Turn the add-on off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v8"/><path d="M6.6 7a7.5 7.5 0 1 0 10.8 0"/></svg>
+      </button>
+    </header>
+
+    <div id="off-bar" class="off-bar" hidden>
+      <span id="off-msg" role="status" aria-live="polite"></span>
+      <button type="button" class="btn primary" id="reload" hidden>Reload page</button>
+    </div>
+
+    <div id="rest">
+      <nav class="tabs" role="tablist" aria-label="Settings sections" id="tabs"></nav>
+      <div id="panels"></div>
+    </div>
+  </div>
+  <script src="settings.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

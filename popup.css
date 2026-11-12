@@ -1,0 +1,249 @@
+/* Same layout as More Settings for Google Apps, with a Canvas-red header wash. */
+:root {
+  --bg: #161616;
+  --card: #0000004d;
+  --input: #ffffff14;
+  --input-hover: #ffffff22;
+  --text: #ececec;
+  --muted: #a8a8a8;
+  --line: #ffffff10;
+  --accent: #8dd28d;       /* switches, checkboxes */
+  --accent-hover: #a3dca3;
+  --accent-ink: #102010;
+  --error: #ff9a92;
+  --radius: 18px;
+  --radius-sm: 9px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+html { background: var(--bg); }
+body {
+  width: 540px;
+  color: var(--text);
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  background:
+    linear-gradient(to bottom, transparent 0, var(--bg) 330px),
+    linear-gradient(118deg, #e4202e 0%, #b3182a 36%, #6a1420 72%, #2a1013 100%);
+  background-color: var(--bg);
+  background-repeat: no-repeat;
+}
+h1, h2, p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.main { padding: 22px 20px 18px; }
+
+/* Header */
+.header { display: flex; align-items: center; gap: 14px; margin: 0 4px 18px; }
+.header img { width: 46px; height: 46px; }
+.header h1 { font-size: 32px; font-weight: 650; letter-spacing: -0.015em; color: #f2f2f2; line-height: 1.05; }
+.header h1 span { display: block; font-size: 15px; font-weight: 600; letter-spacing: 0; color: #f2f2f2b3; margin-top: 2px; }
+
+/* Tabs */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 5px;
+  background: var(--card);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+.tab {
+  border: 0;
+  background: none;
+  border-radius: 13px;
+  padding: 9px 4px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: color .12s ease-out, background-color .12s ease-out;
+}
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--text); background: var(--input-hover); }
+
+:is(.tab, .btn, .stepper button, select):focus-visible,
+:is(.switch, .check) input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Panels: two columns of cards, like Better Canvas */
+.panel { column-count: 2; column-gap: 12px; }
+.panel[hidden] { display: none; }
+.card {
+  break-inside: avoid;
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 16px 16px 14px;
+  background: var(--card);
+  border-radius: var(--radius);
+}
+.card.wide { column-span: all; }
+.card h2 {
+  font-size: 12px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  margin: 0 0 6px 2px;
+}
+
+/* Switch rows: switch on the left, bold label */
+.row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+.row .label { display: grid; gap: 1px; }
+.row .name { font-size: 16px; font-weight: 600; color: var(--text); }
+.row small { color: var(--muted); font-size: 12px; line-height: 1.35; }
+.tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: var(--input);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  vertical-align: 2px;
+}
+
+.switch { position: relative; display: inline-block; width: 46px; height: 26px; flex: none; }
+.switch input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.switch span {
+  position: absolute; inset: 0;
+  background: var(--input);
+  border-radius: var(--radius-sm);
+  transition: background-color .12s linear;
+}
+.switch span::after {
+  content: "";
+  position: absolute;
+  top: 4px; left: 4px;
+  width: 18px; height: 18px;
+  border-radius: 6px;
+  background: #e1e1e130;
+  transition: transform .12s linear, background-color .12s linear;
+}
+.row:hover .switch span { background: var(--input-hover); }
+.switch input:checked + span::after { transform: translateX(20px); background: var(--accent); }
+
+/* Checkbox sub-options */
+.checks { display: grid; gap: 2px; padding: 4px 0 0 2px; }
+.check { display: flex; align-items: center; gap: 10px; padding: 4px 0; cursor: pointer; font-size: 14.5px; }
+.check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.check span.box {
+  width: 20px; height: 20px; flex: none;
+  border-radius: 6px;
+  background: var(--input);
+  display: grid; place-items: center;
+  transition: background-color .12s linear;
+}
+.check:hover span.box { background: var(--input-hover); }
+.check input:checked + span.box { background: var(--accent); }
+.check input:checked + span.box::after {
+  content: "";
+  width: 10px; height: 5px;
+  border: solid var(--accent-ink);
+  border-width: 0 0 2.5px 2.5px;
+  transform: translateY(-1px) rotate(-45deg);
+}
+
+select {
+  font: inherit;
+  color: var(--text);
+  background: var(--input);
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+}
+select option { background: #222; }
+
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+.step-field { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14.5px; padding: 6px 0; }
+.row.big .name { font-size: 19px; }
+.row.big { padding: 2px 0; }
+
+.card .note { color: var(--muted); font-size: 12.5px; }
+.power {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 16px 0 12px;
+  border: 0; border-radius: 20px;
+  background: #8dd28d26; color: var(--accent);
+  box-shadow: inset 0 0 0 2px #8dd28d66;
+  font-size: 14px; font-weight: 700;
+  transition: background-color .12s ease-out, color .12s ease-out, box-shadow .12s ease-out;
+}
+.power svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
+.power:hover { background: #8dd28d38; }
+.power:active { transform: scale(.97); }
+.power:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.power[aria-checked="false"] { background: #ffffff10; color: var(--muted); box-shadow: inset 0 0 0 2px #ffffff26; }
+.power[aria-checked="false"]:hover { background: #ffffff1c; }
+.power[aria-checked="false"]:focus-visible { outline-color: var(--muted); }
+
+.power.icon-only { width: 40px; padding: 0; justify-content: center; }
+.power.icon-only svg { width: 20px; height: 20px; }
+
+/* Off: a note under the title, the rest greyed out and not clickable */
+.off-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin: 0 0 12px; padding: 12px 14px 12px 16px;
+  background: var(--card); border-radius: var(--radius);
+  font-weight: 600; font-size: 14px; line-height: 1.35;
+}
+.off-bar[hidden] { display: none; }
+.off-bar span { flex: 1; }
+body.off #rest { opacity: .35; filter: grayscale(1); transition: opacity .15s ease-out; }
+.header h1 { flex: 1; min-width: 0; }
+
+/* ---------- Canvas additions ---------- */
+/* Sub-options look quieter while their main switch is off (still clickable). */
+.checks.inactive, .step-field.inactive { opacity: .55; }
+
+/* Number slider: "Items per card  [----o---]  4" */
+.range { display: flex; align-items: center; gap: 10px; }
+.range input { width: 120px; accent-color: var(--accent); margin: 0; }
+.range input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.range output { min-width: 1.5em; text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+
+/* Buttons */
+.btn {
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  background: var(--input);
+  font-weight: 650;
+  transition: background-color .12s linear;
+}
+.btn:hover { background: var(--input-hover); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { background: var(--accent-hover); }
+.btn.big { width: 100%; padding: 11px 14px; font-size: 15px; }
+.off-bar .btn[hidden] { display: none; }
+
+/* Canvas address field */
+.host-row { display: flex; gap: 8px; margin-top: 4px; }
+.host-row input {
+  flex: 1; min-width: 0;
+  font: 14px ui-monospace, Consolas, monospace;
+  color: var(--text);
+  background: var(--input);
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+}
+.host-row input:focus-visible { outline: none; border-color: var(--accent); }
+.host-status { color: var(--muted); font-size: 12.5px; min-height: 1.35em; }
+.host-status.bad { color: var(--error); }

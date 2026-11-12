@@ -73,12 +73,10 @@ var mscReminderUI = globalThis.mscReminderUI || (() => {
     document.documentElement.append(host);
   }
 
-  // cards: [{ title, when, url (or null), note, onDismiss }]. filter: CSS filter for the host (undoes dark mode).
-  function show(cards, filter = '') {
+  // cards: [{ title, when, url (or null), note, onDismiss }]
+  function show(cards) {
     if (!cards.length) { clear(); return; }
     ensureHost();
-    if (filter) host.style.setProperty('filter', filter, 'important');
-    else host.style.removeProperty('filter');
     const nextUrls = new Set();
     stack.textContent = '';
     for (const c of cards) {

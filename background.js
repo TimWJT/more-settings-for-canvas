@@ -70,7 +70,7 @@ async function syncExtraHost() {
     id: EXTRA_ID,
     matches: [wanted],
     css: ['canvas.css'],
-    js: ['settings.js', 'content/reminder-card.js', 'content/canvas.js'],
+    js: ['settings.js', 'content/reminder-card.js', 'content/dark.js', 'content/canvas.js'],
     runAt: 'document_start',
     allFrames: false,
   }]);

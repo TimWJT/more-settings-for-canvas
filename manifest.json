@@ -48,6 +48,7 @@
       "js": [
         "settings.js",
         "content/reminder-card.js",
+        "content/dark.js",
         "content/canvas.js"
       ],
       "run_at": "document_start",

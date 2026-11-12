@@ -16,7 +16,8 @@ course file downloader.
 
 Every feature is a switch in the toolbar popup ("Canvas Settings"). The round power button turns everything off.
 
-- **Dark mode**: one colour filter on the page, so Canvas stays as fast as normal. Photos and videos keep their real colours.
+- **Dark mode**: only the white and light-grey parts of Canvas turn dark and the text is made readable. Course
+  colours, coloured buttons and labels, photos and videos keep their exact colours.
 - **Work due on course cards**: under each dashboard card, the next few assignments, quizzes and discussions, as
   "in 3d" or a date. Click a due date to cross it off.
 - **To-do list**: replaces the dashboard's right sidebar. To do / Done views, announcements, a menu on each item
@@ -56,7 +57,7 @@ Open an issue at https://github.com/TimWJT/more-settings-for-canvas/issues and s
 
 - `manifest.json`, `settings.js` (defaults and helpers shared by everything), `background.js` (settings migration,
   the extra Canvas address, downloads)
-- `content/canvas.js` + `canvas.css`: everything on Canvas pages
+- `content/canvas.js` + `canvas.css`: everything on Canvas pages; `content/dark.js`: the live part of dark mode
 - `content/reminders.js` + `content/reminder-card.js`: reminders on other sites
 - `popup.html`, `popup.css`, `popup.js`: the settings popup
 - `html/downloader.html`, `js/downloader.js`, `css/downloader.css`: the course file downloader (sidebar)

@@ -1,27 +1,182 @@
-/* More Settings for Canvas - page styles. Everything is switched on by attributes that content/canvas.js sets on
-   <html>, so nothing here does anything until the matching setting is on.
+/* More Settings for Canvas - page styles. Everything is switched on by attributes that content/canvas.js and
+   content/dark.js set on <html>, so nothing here does anything until the matching setting is on.
 
-   Dark mode is one colour filter on <html>, drawn by the GPU, instead of recolouring every element with JS.
-   invert(a) turns white into #161616 (a = 0.9137) and black into light grey; hue-rotate(180deg) brings colours back
-   to their own hue (blue stays blue). Pictures and videos get the exact opposite filter, so they look normal:
-   hue-rotate(180deg) invert(1) contrast(k) with k = 1 / (2a - 1) = 1.2086.
-   It's off in Windows high contrast (forced colours) and in fullscreen. */
+   Dark mode recolours only the white and light-grey parts of Canvas and makes text readable. Course colours, brand
+   buttons, coloured labels, pictures and videos keep their exact colours. This sheet covers the page shell, plain
+   elements and the libraries Canvas uses (jQuery UI, FullCalendar, TinyMCE, SlickGrid); content/dark.js recolours
+   the rest live (InstUI parts with hashed class names, inline white backgrounds in course content).
+   :where() keeps these rules weak so Canvas's own coloured parts win. Screen only, so printing stays light. */
 
-@media screen and (forced-colors: none) {
-  html[data-mscv-dark]:not([data-mscv-fs]) {
-    filter: invert(0.9137) hue-rotate(180deg) !important;
-    background-color: #fff !important;   /* becomes the dark background */
-    min-height: 100%;
-    color-scheme: light !important;      /* the filter does the darkening, so native widgets must stay light */
+@media screen {
+  :root[data-mscv-dark] {
+    --msc-page: #161616;
+    --msc-surface: #1e1e1e;
+    --msc-raised: #262626;
+    --msc-border: #3a3a3a;
+    --msc-text: #ececec;
+    --msc-muted: #a9a9a9;
+    --msc-link: #7cc4ff;
+    color-scheme: dark;
+    background-color: var(--msc-page);
+    color: var(--msc-text);
   }
 
-  /* Media: real colours. Skips anything inside media that is already undone, so nothing is flipped twice. */
-  html[data-mscv-dark]:not([data-mscv-fs]) :is(
-    img, picture, video, canvas, [style*="background-image"],
-    iframe:is([src*="youtube"], [src*="vimeo.com"], [src*="kaltura"], [src*="panopto"], [src*="echo360"],
-      [src*="loom.com"], [src*="media_objects"], [src*="instructuremedia"], [src*="vidgrid"])
-  ):not(:is(picture, [style*="background-image"]) *) {
-    filter: hue-rotate(180deg) invert(1) contrast(1.2086) !important;
+  /* Page shell */
+  html[data-mscv-dark] :where(body, #application, #wrapper, #main, #content-wrapper, #content,
+    #left-side, #right-side, .ic-app-main-content, .ic-Layout-wrapper, .ic-Layout-contentWrapper, .ic-Layout-contentMain, .ic-app-nav-toggle-and-crumbs, #breadcrumbs, .ic-app-course-menu, #section-tabs) {
+    background-color: var(--msc-page);
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(.ic-DashboardCard, .ic-DashboardCard__action-container, .ig-row, .ig-header, .context_module, .context_module_item) {
+    background-color: var(--msc-surface);
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(#breadcrumbs a, #section-tabs a, .ic-app-course-menu a) { color: var(--msc-text); }
+  html[data-mscv-dark] :where(#content, #right-side, #left-side, .ui-dialog, .user_content)
+    :where(a:not(.btn, .Button, [role="button"], [style*="color"])) { color: var(--msc-link); }
+
+  /* Plain elements */
+  html[data-mscv-dark] :where(hr) { border-color: var(--msc-border); }
+  html[data-mscv-dark] :where(table, .ic-Table, thead, tbody, tr) {
+    background-color: transparent;
+    color: inherit;
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(th, td) { border-color: var(--msc-border); }
+  html[data-mscv-dark] :where(.ic-Table--striped, .table-striped) :where(tbody tr:nth-child(odd)) {
+    background-color: var(--msc-surface);
+  }
+  html[data-mscv-dark] :where(code, pre) {
+    background-color: var(--msc-raised);
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"],
+    [type="image"], [type="submit"], [type="button"], [type="reset"]), select, textarea, .ic-Input) {
+    background-color: var(--msc-surface);
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(input, textarea)::placeholder { color: var(--msc-muted); }
+  /* Only white/grey buttons. Primary, danger, success and other coloured buttons keep their colours. */
+  html[data-mscv-dark] :where(.btn, .Button, .ui-button, button:not([class]),
+    input:is([type="submit"], [type="button"], [type="reset"]):not([class])):not([class*="primary"],
+    [class*="danger"], [class*="success"], [class*="warning"], [class*="info"], [class*="link"]) {
+    background-color: var(--msc-raised);
+    background-image: none;
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+    text-shadow: none;
+  }
+  html[data-mscv-dark] :where(.muted, .text-muted, .ic-Form-control label, legend) { color: var(--msc-muted); }
+
+  /* Menus, popovers, tooltips and modals */
+  html[data-mscv-dark] :where(.al-options, .dropdown-menu, .popover, .ui-popover, .ui-tooltip, .ReactModal__Content,
+    .modal, .modal-body) {
+    background-color: var(--msc-raised);
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(.al-options, .dropdown-menu) :where(a, li) { color: var(--msc-text); }
+  html[data-mscv-dark] :where(.ReactModal__Overlay, .ui-widget-overlay) { background-color: #000000aa; }
+
+  /* jQuery UI */
+  html[data-mscv-dark] :where(.ui-widget-content, .ui-dialog, .ui-dialog-content, .ui-dialog-buttonpane, .ui-menu,
+    .ui-autocomplete, .ui-datepicker, .ui-tabs-nav) {
+    background-color: var(--msc-raised);
+    background-image: none;
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(.ui-widget-header, .ui-dialog-titlebar, .ui-datepicker-header, .ui-state-default) {
+    background-color: var(--msc-surface);
+    background-image: none;
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(.ui-state-hover, .ui-state-focus, .ui-menu-item a:hover) {
+    background-color: #333333;
+    background-image: none;
+    color: var(--msc-text);
+  }
+  html[data-mscv-dark] :where(.ui-datepicker td a, .ui-dialog-title, .ui-menu-item a) {
+    color: var(--msc-text);
+  }
+
+  /* FullCalendar (the Canvas calendar). Events keep their course colours. */
+  html[data-mscv-dark] :where(.fc) {
+    --fc-page-bg-color: var(--msc-page);
+    --fc-neutral-bg-color: var(--msc-raised);
+    --fc-neutral-text-color: var(--msc-muted);
+    --fc-border-color: var(--msc-border);
+    --fc-list-event-hover-bg-color: var(--msc-raised);
+    color: var(--msc-text);
+  }
+  html[data-mscv-dark] :where(.fc) :where(th, td, thead, tbody, .fc-row, .fc-widget-header, .fc-widget-content) { border-color: var(--msc-border); }
+  html[data-mscv-dark] :where(.fc) :where(.fc-view-container, .fc-list-view, .fc-popover) {
+    background-color: var(--msc-surface);
+    color: var(--msc-text);
+  }
+  html[data-mscv-dark] :where(.fc) :where(.fc-list-heading td, .fc-list-day-cushion, .fc-popover .fc-header,
+    .fc-divider, .fc-day-header) { background-color: var(--msc-raised); color: var(--msc-text); }
+  html[data-mscv-dark] :where(.fc) :where(.fc-day-number) {
+    color: var(--msc-text);
+  }
+
+  /* TinyMCE editor chrome. Its own CSS uses ".tox .x" selectors, so these need one more class to win.
+     The text being edited is in an iframe, which content/dark.js handles. */
+  html[data-mscv-dark] .tox.tox-tinymce { border-color: var(--msc-border); }
+  html[data-mscv-dark] .tox :is(.tox-editor-header, .tox-menubar, .tox-toolbar, .tox-toolbar__primary,
+    .tox-toolbar-overlord, .tox-statusbar, .tox-edit-area, .tox-menu,
+    .tox-collection, .tox-dialog, .tox-dialog__header, .tox-dialog__body, .tox-dialog__footer) {
+    background-color: var(--msc-surface);
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] .tox :is(.tox-tbtn, .tox-mbtn, .tox-split-button, .tox-statusbar__path-item,
+    .tox-statusbar__wordcount, .tox-collection__item, .tox-dialog__title, .tox-label) { color: var(--msc-text); }
+  html[data-mscv-dark] .tox :is(.tox-tbtn, .tox-mbtn, .tox-split-button, .tox-collection__item-icon) svg {
+    fill: var(--msc-text);
+  }
+  html[data-mscv-dark] .tox :is(.tox-tbtn:hover, .tox-tbtn--enabled, .tox-mbtn:hover, .tox-mbtn--active,
+    .tox-split-button:hover, .tox-collection__item--active) {
+    background-color: var(--msc-raised);
+    color: var(--msc-text);
+  }
+  html[data-mscv-dark] .tox :is(.tox-textfield, .tox-listbox) {
+    background-color: var(--msc-page);
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+
+  /* SlickGrid (gradebook). Cells with a state colour (late, missing, excused) use stronger selectors and keep it. */
+  html[data-mscv-dark] :where(.slick-header, .slick-header-column, .slick-headerrow-column) {
+    background-color: var(--msc-raised);
+    background-image: none;
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(.slick-viewport, .slick-row, .slick-cell) {
+    background-color: var(--msc-surface);
+    color: var(--msc-text);
+    border-color: var(--msc-border);
+  }
+  html[data-mscv-dark] :where(.slick-row.odd) { background-color: var(--msc-page); }
+  html[data-mscv-dark] :where(.slick-cell.active, .slick-cell.selected) { background-color: #2a3440; }
+
+  /* What this add-on draws (the light colours are under "Shared bits" below) */
+  html[data-mscv-dark] :is(.mscv-due, .mscv-todo, .mscv-notes) {
+    --mscv-text: var(--msc-text);
+    --mscv-muted: var(--msc-muted);
+    --mscv-line: var(--msc-border);
+    --mscv-soft: var(--msc-raised);
+    --mscv-red: #ff8a8f;
+    --mscv-accent: var(--msc-link);
+    --mscv-bg: var(--msc-surface);
+    --mscv-pop: var(--msc-raised);
+    --mscv-input-line: #4a4a4a;
   }
 }
 
@@ -35,7 +190,7 @@ html[data-mscv-todo] #right-side > :not(#mscv-todo):not(.recent_feedback):not(:h
   display: none !important;
 }
 
-/* ---------- Shared bits for what we add (Canvas's light look; dark mode's filter darkens it like the rest) ---------- */
+/* ---------- Shared bits for what we add (Canvas's light look; dark mode swaps the colours, see above) ---------- */
 :is(.mscv-due, .mscv-todo, .mscv-notes) {
   --mscv-text: #273540;
   --mscv-muted: #5f6b75;
@@ -43,6 +198,9 @@ html[data-mscv-todo] #right-side > :not(#mscv-todo):not(.recent_feedback):not(:h
   --mscv-soft: #f2f4f5;
   --mscv-red: #c4161f;
   --mscv-accent: #2b7abc;
+  --mscv-bg: #fff;
+  --mscv-pop: #fff;
+  --mscv-input-line: #c7cdd1;
   font-family: inherit;
   color: var(--mscv-text);
   box-sizing: border-box;
@@ -72,9 +230,9 @@ html[data-mscv-todo] #right-side > :not(#mscv-todo):not(.recent_feedback):not(:h
   width: 100%;
   min-height: 40px;
   padding: 9px 12px;
-  border: 1px solid #c7cdd1;
+  border: 1px solid var(--mscv-input-line);
   border-radius: 6px;
-  background: #fff;
+  background: var(--mscv-bg);
   color: var(--mscv-text);
   font: inherit;
   font-size: 15px;
@@ -118,8 +276,8 @@ a.mscv-due-title:hover { color: var(--mscv-accent); }
   font: inherit; color: inherit; cursor: pointer; margin: 0;
 }
 .mscv-seg-btn { border: 0; background: none; padding: 3px 9px; border-radius: 6px; font-size: 12.5px; font-weight: 600; color: var(--mscv-muted); }
-.mscv-seg-btn[aria-pressed="true"] { background: #fff; color: var(--mscv-text); box-shadow: 0 1px 2px #0000001f; }
-.mscv-add-btn { border: 1px solid var(--mscv-line); background: #fff; padding: 3px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 600; }
+.mscv-seg-btn[aria-pressed="true"] { background: var(--mscv-bg); color: var(--mscv-text); box-shadow: 0 1px 2px #0000001f; }
+.mscv-add-btn { border: 1px solid var(--mscv-line); background: var(--mscv-bg); padding: 3px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 600; }
 .mscv-add-btn:hover, .mscv-btn:hover { background: var(--mscv-soft); }
 
 .mscv-status:empty { display: none; }
@@ -165,7 +323,7 @@ a.mscv-title:hover { text-decoration: underline; }
 .mscv-menu {
   position: absolute; right: 0; top: 38px; z-index: 20;
   display: grid; min-width: 170px; padding: 4px;
-  background: #fff; border-radius: 8px;
+  background: var(--mscv-pop); border-radius: 8px;
   box-shadow: 0 6px 22px #00000029, 0 0 0 1px #0000001a;
 }
 .mscv-menu-item { border: 0; background: none; text-align: left; padding: 7px 10px; border-radius: 6px; font-size: 13.5px; }
@@ -185,13 +343,13 @@ a.mscv-title:hover { text-decoration: underline; }
 .mscv-field { display: grid; gap: 3px; font-size: 12.5px; font-weight: 600; color: var(--mscv-muted); }
 .mscv-field :is(input, select), .mscv-label-form input {
   font: inherit; font-size: 14px; font-weight: 400; color: var(--mscv-text);
-  padding: 5px 8px; border: 1px solid #c7cdd1; border-radius: 6px; background: #fff; width: 100%;
+  padding: 5px 8px; border: 1px solid var(--mscv-input-line); border-radius: 6px; background: var(--mscv-bg); width: 100%;
   margin: 0; height: auto;
 }
 .mscv-form-error { margin: 0; color: var(--mscv-red); font-size: 12.5px; }
 .mscv-form-error:empty { display: none; }
 .mscv-form-actions { display: flex; gap: 8px; }
-.mscv-btn { border: 1px solid #c7cdd1; background: #fff; padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+.mscv-btn { border: 1px solid var(--mscv-input-line); background: var(--mscv-bg); padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; }
 .mscv-btn.mscv-primary { background: #2b7abc; border-color: #2b7abc; color: #fff; }
 .mscv-btn.mscv-primary:hover { background: #23679f; }
 .mscv-label-form { display: flex; gap: 6px; margin-top: 5px; }
@@ -200,7 +358,7 @@ a.mscv-title:hover { text-decoration: underline; }
 .mscv-preview {
   position: absolute; left: 0; right: 0; z-index: 15;
   margin-top: 2px; padding: 10px 12px;
-  background: #fff; border-radius: 8px;
+  background: var(--mscv-pop); border-radius: 8px;
   box-shadow: 0 6px 22px #00000029, 0 0 0 1px #0000001a;
   font-size: 13px; pointer-events: none;
 }

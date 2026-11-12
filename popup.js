@@ -9,7 +9,7 @@ const TABS = [
       {
         title: 'Look',
         switches: [
-          ['dark', 'Dark mode', 'Photos keep their colours'],
+          ['dark', 'Dark mode', 'Course colours stay as they are'],
           ['compactCards', 'Compact cards', 'Shorter course card tops'],
         ],
       },

@@ -1,5 +1,5 @@
 // More Settings for Canvas - runs on Canvas pages (top frame, from document_start).
-// Dark mode, compact cards and hiding feedback are attributes on <html> that canvas.css acts on.
+// Dark mode is content/dark.js + canvas.css. Compact cards and hiding feedback are attributes on <html> for canvas.css.
 // On the dashboard it also adds: upcoming work under each course card, a to-do list in the right sidebar and a
 // notes box. Everything follows the popup live through storage changes; nothing needs a page reload.
 (() => {
@@ -10,8 +10,6 @@
   const ORIGIN = location.origin;
   const IS_DASHBOARD = location.pathname === '/';
   const DARK_FLAG = 'mscv-dark';
-  // Exact opposite of the page filter in canvas.css (used on our reminder card, which sits on top of the page).
-  const UNDO_DARK = 'hue-rotate(180deg) invert(1) contrast(1.2086)';
   const WORK = new Set(['assignment', 'quiz', 'discussion_topic']);
   // Short prefixes for item ids so assignment 12 and quiz 12 don't share saved state.
   const PREFIX = { assignment: 'a', quiz: 'q', discussion_topic: 'd', announcement: 'n', wiki_page: 'w',
@@ -23,7 +21,7 @@
   // The page's localStorage is read synchronously, so there's no white flash. storage.sync confirms it a moment later.
   let darkCached = true;
   try { darkCached = localStorage.getItem(DARK_FLAG) !== '0'; } catch { /* storage blocked */ }
-  root.toggleAttribute('data-mscv-dark', darkCached);
+  mscDark.set(darkCached);
 
   // ---------- Settings and saved data ----------
   let s = { ...MSC_DEFAULTS };
@@ -58,7 +56,7 @@
   // ---------- Applying settings ----------
   function apply() {
     const dark = on() && s.dark;
-    root.toggleAttribute('data-mscv-dark', dark);
+    mscDark.set(dark);
     if (dark !== darkCached) {
       darkCached = dark;
       try { localStorage.setItem(DARK_FLAG, dark ? '1' : '0'); } catch { /* storage blocked */ }
@@ -903,7 +901,7 @@
       when: 'Due in 3 days',
       note: 'Shows up on other sites when something is due soon',
       url: null,
-    }], root.hasAttribute('data-mscv-dark') ? UNDO_DARK : '');
+    }]);
     clearTimeout(exampleTimer);
     exampleTimer = setTimeout(() => mscReminderUI.clear(), 8000);
   }
@@ -945,9 +943,4 @@
 
   // The dashboard parts need the page's body, so they start at DOMContentLoaded (if settings are in by then).
   document.addEventListener('DOMContentLoaded', () => { if (loaded) apply(); }, { once: true });
-
-  // Show real colours in fullscreen (videos, presentations).
-  document.addEventListener('fullscreenchange', () => {
-    root.toggleAttribute('data-mscv-fs', !!document.fullscreenElement);
-  });
 })();

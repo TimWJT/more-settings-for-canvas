@@ -145,10 +145,11 @@ try:
     # ---------- dashboard on fake Canvas ----------
     d.get(FAKE + "/")
     time.sleep(4)
-    dark = d.execute_script("return [document.documentElement.hasAttribute('data-mscv-dark'), getComputedStyle(document.documentElement).filter, localStorage.getItem('mscv-dark')]")
-    check("dark mode on by default", dark[0] and "invert" in dark[1] and dark[2] in (None, "1"), str(dark))
-    img = d.execute_script("return getComputedStyle(document.querySelector('.ic-DashboardCard__header_image')).filter")
-    check("background-image elements un-inverted", "invert(1)" in img, img)
+    dark = d.execute_script("const h = document.documentElement; return [h.hasAttribute('data-mscv-dark'), getComputedStyle(h).filter, localStorage.getItem('mscv-dark'), getComputedStyle(document.body).backgroundColor, getComputedStyle(document.querySelector('.ic-DashboardCard')).backgroundColor]")
+    check("dark mode on by default (no filter, dark page and cards)", dark[0] and dark[1] == "none" and dark[2] in (None, "1")
+          and dark[3] == "rgb(22, 22, 22)" and dark[4] == "rgb(30, 30, 30)", str(dark))
+    img = d.execute_script("const e = document.querySelector('.ic-DashboardCard__header_image'); return [getComputedStyle(e).filter, e.hasAttribute('data-mscv-rc'), document.querySelector('.ic-DashboardCard__header_hero').style.backgroundColor]")
+    check("card picture and course colour untouched", img == ["none", False, "rgb(228, 32, 46)"], str(img))
     st = d.execute_script("""return {
       notes: !!document.querySelector('.mscv-notes textarea[aria-label="Dashboard notes"]'),
       notesBeforeCards: document.querySelector('.mscv-notes')?.nextElementSibling?.id,
@@ -265,8 +266,8 @@ try:
     # Dark mode off live, then power off removes everything
     sync_set({"dark": False})
     time.sleep(0.5)
-    dk = d.execute_script("return [document.documentElement.hasAttribute('data-mscv-dark'), localStorage.getItem('mscv-dark')]")
-    check("dark mode turns off live", dk == [False, "0"], str(dk))
+    dk = d.execute_script("return [document.documentElement.hasAttribute('data-mscv-dark'), localStorage.getItem('mscv-dark'), document.querySelectorAll('[data-mscv-rc]').length, getComputedStyle(document.body).backgroundColor]")
+    check("dark mode turns off live", dk == [False, "0", 0, "rgb(255, 255, 255)"], str(dk))
     d.save_screenshot(os.path.join(OUT, "v2-dashboard-light.png"))
     sync_set({"dark": True, "on": False})
     time.sleep(0.6)
@@ -286,6 +287,84 @@ try:
     ex = d.execute_script("return !!document.querySelector('msc-reminders')")
     check("example reminder on the Canvas tab", ex)
     d.save_screenshot(os.path.join(OUT, "v2-example-reminder.png"))
+
+    # ---------- dark mode recolouring on a fake course page ----------
+    sync_set({"remind": False, "dark": False})
+    time.sleep(0.5)
+    PROBE = r"""
+      const parse = (t) => (t.match(/[\d.]+/g) || []).map(Number);
+      const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+      const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+      const ratio = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
+      function effBg(e) {
+        for (; e; e = e.parentElement) {
+          const c = parse(e.ownerDocument.defaultView.getComputedStyle(e).backgroundColor);
+          if (c.length && (c.length < 4 || c[3] > 0.5)) return c;
+        }
+        return [255, 255, 255];
+      }
+      function info(e) {
+        if (!e) return null;
+        const cs = e.ownerDocument.defaultView.getComputedStyle(e);
+        return { bg: cs.backgroundColor, color: cs.color, fill: cs.fill, filter: cs.filter, mark: e.getAttribute('data-mscv-rc'),
+                 style: e.getAttribute('style'), bgLum: lum(effBg(e)), contrast: ratio(parse(cs.color), effBg(e)) };
+      }
+      const out = {};
+      for (const id of arguments[0]) out[id] = info(document.getElementById(id));
+      const f = document.getElementById('t-frame').contentDocument;
+      out.frameBody = f && info(f.body);
+      out.frameP = f && info(f.getElementById('f-p'));
+      out.marks = document.querySelectorAll('[data-mscv-rc]').length;
+      return out;"""
+    IDS = ["t-h1", "t-instui", "t-instui-text", "t-card", "t-hero", "t-card-title", "t-red", "t-grey", "t-label",
+           "t-inline", "t-inline-p", "t-pale", "t-img", "t-fc-view", "t-fc-td", "t-fc-event", "t-tox-bar", "t-tox-btn", "t-tox-svg",
+           "t-later", "content"]
+    probe = lambda: d.execute_script(PROBE, IDS)
+    d.get(FAKE + "/darktest")
+    time.sleep(2)
+    light = probe()
+    sync_set({"dark": True})
+    time.sleep(2)
+    dk = probe()
+    d.save_screenshot(os.path.join(OUT, "v2-darktest-dark.png"))
+    dark_now = lambda k: dk[k] and dk[k]["bgLum"] < 0.05
+    surfaces = ["t-instui", "t-card", "t-inline", "t-fc-view", "t-tox-bar", "t-grey", "t-later", "content", "frameBody"]
+    check("dark: white surfaces became dark (incl. hashed class, inline white, .fc, .tox, iframe, added later)",
+          all(dark_now(k) for k in surfaces), json.dumps({k: dk[k] and dk[k]["bg"] for k in surfaces}))
+    texts = ["t-h1", "t-instui-text", "t-inline-p", "t-later", "t-grey", "t-tox-btn", "t-fc-td", "frameP"]
+    check("dark: main text readable (contrast >= 4.5)", all(dk[k] and dk[k]["contrast"] >= 4.5 for k in texts),
+          json.dumps({k: dk[k] and round(dk[k]["contrast"], 2) for k in texts}))
+    check("dark: TinyMCE icon readable", dk["t-tox-svg"]["fill"] == "rgb(236, 236, 236)", dk["t-tox-svg"]["fill"])
+    same = [("t-hero", "bg"), ("t-card-title", "color"), ("t-red", "bg"), ("t-red", "color"), ("t-label", "bg"),
+            ("t-label", "color"), ("t-fc-event", "bg"), ("t-fc-event", "color"), ("t-pale", "bg")]
+    check("dark: course colour, red button, label, event and pale tint exactly unchanged",
+          all(dk[k][p] == light[k][p] for k, p in same), json.dumps({f"{k}.{p}": [light[k][p], dk[k][p]] for k, p in same}))
+    check("dark: image untouched", dk["t-img"]["filter"] == "none" and dk["t-img"]["mark"] is None and dk["t-img"]["style"] is None,
+          json.dumps(dk["t-img"]))
+    sync_set({"dark": False})
+    time.sleep(0.8)
+    back = probe()
+    diff = {k: [light[k], back[k]] for k in IDS + ["frameP", "frameBody"]
+            if any(light[k][p] != back[k][p] for p in ("bg", "color", "fill", "filter"))}
+    check("dark off restores the original colours exactly", not diff and back["marks"] == 0,
+          json.dumps(diff)[:600] + f" marks={back['marks']}")
+    sync_set({"dark": True})
+    time.sleep(1.5)
+    again = probe()
+    check("dark on again recolours again", all(again[k] and again[k]["bgLum"] < 0.05 for k in surfaces))
+
+    # First-pass timing (dark.js writes its numbers to <html> when the page's localStorage asks for it)
+    d.execute_script("localStorage.setItem('mscv-dark-timing', '1')")
+    for path in ["/", "/big"]:
+        d.get(FAKE + path)
+        time.sleep(4)
+        t = d.execute_script("return [document.documentElement.getAttribute('data-mscv-timing'), document.getElementsByTagName('*').length]")
+        print(f"TIMING {path}: {t[0]}  ({t[1]} elements on the page)", flush=True)
+        check(f"first dark pass finished on {path}", bool(t[0]), str(t))
+    big = d.execute_script("const r = [...document.querySelectorAll('[class$=\"-row\"] > div')].slice(0, 50); return r.every(e => getComputedStyle(e).backgroundColor === 'rgb(30, 30, 30)')")
+    check("big page: inline white rows recoloured", big)
+    d.execute_script("localStorage.removeItem('mscv-dark-timing')")
+    sync_set({"remind": True})
 
     # ---------- reminders on another site ----------
     now = int(time.time() * 1000)
